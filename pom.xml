@@ -1,0 +1,380 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.techunity</groupId>
+	<artifactId>rest-demo</artifactId>
+	<version>1.0</version>
+	<name>Jakarta RESTful Web Services Demo</name>
+
+	<properties> 
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<!-- Set default values for specific plugins that will be used for plugins in this Maven module and in child modules -->
+<!-- 	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>2.0.0</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement> -->
+
+	<dependencies>
+		<!-- CDI - Contexts and Dependency Injection -->
+		<!-- Not using uber or shaded jars to avoid duplicate dependencies and hard to resolve conflicts -->
+		<!-- Jakarta CDI 3.0 API - specification -->
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope> <!-- also included in weld-se-core -->
+		</dependency>
+		<!-- Weld 4.0.1 API - CDI implementation -->
+		<dependency>
+		    <groupId>org.jboss.weld.se</groupId>
+		    <artifactId>weld-se-core</artifactId>
+		    <version>4.0.1.SP1</version>
+		</dependency>
+		<!-- Weld 4.0.1 API - CDI support for servlets -->
+ 		<dependency>
+		    <groupId>org.jboss.weld.servlet</groupId>
+		    <artifactId>weld-servlet-core</artifactId>
+		    <version>4.0.1.SP1</version>
+		</dependency>
+
+		<!-- Jetty 11 - web server -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>11.0.2</version>
+		</dependency>
+		<!-- Jetty 11 - servlet container -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>11.0.2</version>
+		</dependency>
+				
+		<!-- Jakarta RESTful Web Services 3.0.0 - API specification -->
+		<dependency>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+			<version>3.0.0</version>
+		</dependency>		
+		<!-- Jersey 3.0.2 - Jakarta RESTful Web Services implementation -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<!-- Jersey 3.0.2 - CDI support -->
+ 		<dependency>
+			<groupId>org.glassfish.jersey.ext.cdi</groupId>
+			<artifactId>jersey-cdi1x</artifactId>
+			<version>3.0.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.ext.cdi</groupId>
+			<artifactId>jersey-cdi1x-servlet</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+		<!-- The following jar is for Weld 2 for Java Standard Edition support, 
+			but it conflicted with the way I bootstrap Weld. So I'm not using it. Setting 
+			up the Jetty Servlet container by passing in the already created Weld container 
+			seems to work just fine. -->
+<!--	<dependency>
+			<groupId>org.glassfish.jersey.ext.cdi</groupId>
+			<artifactId>jersey-weld2-se</artifactId>
+			<version>3.0.2</version>
+		</dependency>  -->
+		<!-- Jersey 3.0.2 - Jersey's own independency injection framework, used for injections not covered by Weld -->
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>3.0.2</version>
+		</dependency>
+
+		<!-- Jackson 2.12.3 - JSON data binding library
+			used by Jersey as a JSON provider (others can be used alternatively) -->    		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.12.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.12.3</version>
+		</dependency>
+		
+		<!-- Logging frameworks - log everything via SLF4J and Logback -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+ 		<finalName>itsc</finalName>
+ 		<!-- Set default values for specific plugins that will be used for plugins in this Maven module and in child modules -->
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+ 								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-antrun-plugin</artifactId>
+										<versionRange>1.8</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore/>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+				
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+  			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+    			<version>5.1.0</version>
+				<executions>
+					<execution>
+						<id>1.0</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/restapi-1.0.yaml</inputSpec>
+							<generatorName>jaxrs-cxf-cdi</generatorName>
+							<apiPackage>de.techunity.itsc.restapi.v1.api</apiPackage>
+							<modelPackage>de.techunity.itsc.restapi.v1.model</modelPackage>
+							<generateSupportingFiles>false</generateSupportingFiles>
+			 				<ignoreFileOverride>${project.basedir}/src/main/resources/dot_openapi-generator-ignore</ignoreFileOverride>
+							<configOptions>
+								<java8>true</java8>
+							</configOptions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>process_1</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+               					<!-- remove references to Swagger and annotations -->
+ 								<replaceregexp 	match="import io\.swagger" replace="// import io.swagger" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+ 								<replaceregexp 	match="@Api\(" replace="// @Api(" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+ 								<replaceregexp 	match="@ApiModel" replace="// @ApiModel" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+ 								<replaceregexp 	match="@ApiOperation" replace="// @ApiOperation" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+ 								<replaceregexp 	match="@ApiResponse" replace="// @ApiResponse" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+               					
+               					<!-- remove references to Apache CXF and annotations -->
+ 								<replaceregexp 	match="import org\.apache\.cxf" replace="// import org.apache.cxf" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+  								<replaceregexp 	match="@javax\.annotation" replace="// @jakarta.annotation" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+
+               					<!-- remove references to Jakarta Bean Validation API and annotations -->
+ 								<replaceregexp 	match="import javax\.validation" replace="// import jakarta.validation" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+  								<replaceregexp 	match="javax\.validation" replace="// jakarta.validation" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+  								<replaceregexp 	match="@NotNull" replace="// @NotNull" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+               					
+               					<!-- remove references to Jakarta XML Binding 3.0 API and annotations  -->
+ 								<replaceregexp 	match="import javax\.xml\.bind" replace="// import jakarta.xml.bind" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>  
+  								<replaceregexp 	match="@XmlType\(" replace="// @XmlType(" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+  								<replaceregexp 	match="@XmlEnum\(" replace="// @XmlEnum(" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+  								<replaceregexp 	match="@XmlEnumValue\((.*?)\)" replace="/*@XmlEnumValue(($1))*/" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+               					
+               					<!-- Use Java 11 package names -->
+  								<replaceregexp 	match="javax\.enterprise" replace="jakarta.enterprise" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+  								<replaceregexp 	match="javax\.inject" replace="jakarta.inject" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+  								<replaceregexp 	match="javax\.ws\.rs" replace="jakarta.ws.rs" flags="g">
+	               					<fileset dir="${project.build.directory}/generated-sources/openapi/src/gen/java">
+										<include name="**/*.java" />
+	               					</fileset>
+               					</replaceregexp>   
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/openapi/src/gen/java/</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<release>11</release>
+					<compilerArgument>-Xlint:all</compilerArgument>
+           		</configuration>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>resolve</goal>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		
+		<!-- Configure the source files as resources to be filtered into a custom 
+			target directory -->
+ 		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<filtering>true</filtering>
+				<targetPath>../filtered-sources/java</targetPath>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+		<sourceDirectory>target/filtered-sources/java</sourceDirectory>
+	</build>
+
+</project>

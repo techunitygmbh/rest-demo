@@ -1,0 +1,68 @@
+openapi: 3.0.1
+info:
+  title: Status Example
+  version: "1.0"
+tags:
+- name: Status
+paths:
+  /status:
+    get:
+      tags:
+      - Status
+      summary: get status of application
+      description: get status of application
+      operationId: getStatus
+      responses:
+        200:
+          description: OK - application is operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        503:
+          description: application is temporaily not operational - maybe shutting
+            down or starting up - don't send requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    description: error message for developers
+components:
+  schemas:
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          description: status code
+          enum:
+          - OK
+          - WARN
+          - FAIL
+      description: Status of application
+    Error:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+  responses:
+    Error:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
